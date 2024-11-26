@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  email        String  @unique
+  phone        String?
+  password     String
+  lastName     String
+  firstName    String
+  isAdmin      Boolean
+  address      String?
+  currentLevel Int     @map("currentLevel")
+  score        Int
+}
+
+model Level {
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  scoreThreshold Int
+  levelNumber    Int
+}
+
+model Categories {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  title     ProductCategory
+  createdAt DateTime        @default(now())
+}
+
+enum Gender {
+  WOMEN @map("women")
+  MEN @map("men")
+  UNISEX @map("unisex")
+}
+
+model Product {
+  id            String          @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  desc          String?
+  price         Float
+  category      ProductCategory
+  isAvailable   Boolean
+  imgs          String[]        @default([])
+  requiredLevel Int
+  gender        Gender          // Added the gender attribute to differentiate the clothes
+
+  code          Code?           @relation("ProductToCode", fields: [codeId], references: [id])
+  codeId        String?         @unique @db.ObjectId // Foreign key for Code
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Code {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  isUsed    Boolean
+
+  product   Product? @relation("ProductToCode")
+}
+
+enum ProductCategory {
+  TSHIRT @map("t-shirt")
+  HOODIE @map("hoodie")
+  SHIRT  @map("shirt")
+}
